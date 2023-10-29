@@ -1,7 +1,8 @@
-package main
+package postgres
 
 import (
 	"fmt"
+	"go_blog/models"
 	"log"
 	"os"
 
@@ -10,13 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Post struct {
-	gorm.Model
-	Text  string
-	Title string `gorm:unique`
-}
-
-func db() {
+func SetupDBConnection() {
 	godotenv.Load()
 	DB_HOST := os.Getenv("DB_HOST")
 	DB_USER := os.Getenv("DB_USER")
@@ -31,16 +26,16 @@ func db() {
 	}
 
 	// Migrate the schema
-	db.AutoMigrate(&Post{})
+	db.AutoMigrate(&models.Post{})
 
-	post := Post{Text: "hello world", Title: "post 1"}
+	post := models.Post{Text: "hello world", Title: "post 1"}
 	result := db.Create(&post)
 	if result.Error != nil {
 		log.Fatalf("Failed to create post: %v", result.Error)
 	}
 
 	// Read
-	var firstPost Post
+	var firstPost models.Post
 
 	if err := db.First(&firstPost).Error; err != nil {
 		log.Fatalf("Failed to read the first post: %v", err)
