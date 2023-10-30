@@ -5,6 +5,7 @@ import (
 	"go_blog/models"
 	"go_blog/storage"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -33,8 +34,22 @@ func (h *BlogHandlerImpl) HandleGetAllPosts(c *fiber.Ctx) error {
 }
 
 func (h *BlogHandlerImpl) HandleGetPostByID(c *fiber.Ctx) error {
-	postID := c.Params("id")
-	return c.SendString("Get Post by ID: " + postID)
+	postID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		fmt.Printf("invalid id, could not convert to int error: %v", err)
+		return c.SendStatus(400)
+	}
+
+	post, err := h.Storage.GetPostByID(postID)
+	if err != nil {
+		fmt.Printf("could not get post with id %v. error %v", postID, err)
+		return c.SendStatus(400)
+	}
+
+	var response strings.Builder
+	response.WriteString(fmt.Sprintf("Title: %s, Text: %s\n", post.Title, post.Text))
+
+	return c.SendString(response.String())
 }
 
 func (h *BlogHandlerImpl) HandleUpdatePostByID(c *fiber.Ctx) error {
