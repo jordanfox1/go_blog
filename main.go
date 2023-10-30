@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go_blog/handlers"
 	"go_blog/postgres"
 	"go_blog/routes"
 
@@ -10,7 +11,9 @@ import (
 func main() {
 	postgres.SetupDBConnection()
 	app := fiber.New()
-	routes.SetupBlogRoutes(app)
+
+	handler := &handlers.BlogHandlerImpl{}
+	routes.SetupBlogRoutes(app, handler)
 
 	app.Listen(":3000")
 }
