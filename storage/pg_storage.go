@@ -36,13 +36,16 @@ func (p *PostgresStorage) CreatePost(post *models.Post) error {
 	return nil
 }
 
-func (p *PostgresStorage) UpdatePost(post models.Post) error {
-	if err := p.DB.Save(&post).Error; err != nil {
+func (p *PostgresStorage) UpdatePost(postID int, title, text string) error {
+	existingPost, err := p.GetPostByID(postID)
+	if err != nil {
 		return err
 	}
-	return nil
-}
 
+	existingPost.Text, existingPost.Title = text, title
+
+	return p.DB.Save(existingPost).Error
+}
 func (p *PostgresStorage) DeletePost(id int) error {
 	if err := p.DB.Where("id = ?", id).Delete(&models.Post{}).Error; err != nil {
 		return err

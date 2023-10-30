@@ -53,8 +53,26 @@ func (h *BlogHandlerImpl) HandleGetPostByID(c *fiber.Ctx) error {
 }
 
 func (h *BlogHandlerImpl) HandleUpdatePostByID(c *fiber.Ctx) error {
-	postID := c.Params("id")
-	return c.SendString("Update Post by ID: " + postID)
+	var newPost models.Post
+
+	if err := c.BodyParser(&newPost); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Failed to parse request body",
+		})
+	}
+
+	postID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "error converting id to int",
+		})
+	}
+
+	err = h.Storage.UpdatePost(postID, newPost.Title, newPost.Text)
+	if err != nil {
+		return err
+	}
+	return c.SendString(fmt.Sprintf("Updated Post with ID: %v", postID))
 }
 
 func (h *BlogHandlerImpl) HandleDeletePostByID(c *fiber.Ctx) error {
