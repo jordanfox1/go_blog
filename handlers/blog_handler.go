@@ -18,7 +18,7 @@ type BlogHandlerImpl struct {
 func (h *BlogHandlerImpl) HandleGetAllPosts(c *fiber.Ctx) error {
 	posts, err := h.Storage.GetAllPosts()
 	if err != nil {
-		log.Fatalf("Failed to retrieve posts: %v", err)
+		log.Printf("Failed to retrieve posts: %v", err)
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to retrieve posts")
 	}
 
@@ -76,8 +76,16 @@ func (h *BlogHandlerImpl) HandleUpdatePostByID(c *fiber.Ctx) error {
 }
 
 func (h *BlogHandlerImpl) HandleDeletePostByID(c *fiber.Ctx) error {
-	postID := c.Params("id")
-	return c.SendString("Delete Post by ID: " + postID)
+	postID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return err
+	}
+
+	err = h.Storage.DeletePost(postID)
+	if err != nil {
+		return err
+	}
+	return c.SendString(fmt.Sprintf("Deleted Post with ID: %v", postID))
 }
 
 func (h *BlogHandlerImpl) HandleCreatePost(c *fiber.Ctx) error {
@@ -96,7 +104,7 @@ func (h *BlogHandlerImpl) HandleCreatePost(c *fiber.Ctx) error {
 	// Call the CreatePost method from the storage layer
 	err := h.Storage.CreatePost(&post)
 	if err != nil {
-		log.Fatalf("Failed to create post: %v", err)
+		log.Printf("Failed to create post: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to create post",
 		})

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"go_blog/models"
 	"log"
 
@@ -46,9 +47,14 @@ func (p *PostgresStorage) UpdatePost(postID int, title, text string) error {
 
 	return p.DB.Save(existingPost).Error
 }
+
 func (p *PostgresStorage) DeletePost(id int) error {
-	if err := p.DB.Where("id = ?", id).Delete(&models.Post{}).Error; err != nil {
-		return err
+	result := p.DB.Where("id = ?", id).Delete(&models.Post{})
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("post not found with ID: %d", id)
+	}
+	if result.Error != nil {
+		return result.Error
 	}
 	return nil
 }
