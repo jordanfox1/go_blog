@@ -63,11 +63,26 @@ func (h *BlogHandlerImpl) HandleDeletePostByID(c *fiber.Ctx) error {
 }
 
 func (h *BlogHandlerImpl) HandleCreatePost(c *fiber.Ctx) error {
-	post := models.Post{Text: "hello world", Title: "post 1"}
+	// Initialize an empty Post model
+	var post models.Post
+
+	// Parse and decode the request body into the Post model
+	if err := c.BodyParser(&post); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Failed to parse request body",
+		})
+	}
+
+	// Now 'post' contains the data from the request body
+
+	// Call the CreatePost method from the storage layer
 	err := h.Storage.CreatePost(&post)
 	if err != nil {
 		log.Fatalf("Failed to create post: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to create post",
+		})
 	}
 
-	return c.SendStatus(200)
+	return c.SendStatus(fiber.StatusCreated)
 }
