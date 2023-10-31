@@ -22,7 +22,7 @@ func SetupDBConnection() *gorm.DB {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%v sslmode=disable", DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Errorf("error connecting to database. error: %v", err)
+		log.Fatalf("error connecting to database. error: %v", err)
 	}
 
 	// Migrate the schema
