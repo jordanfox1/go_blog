@@ -5,6 +5,7 @@ import (
 	"go_blog/models"
 	"os"
 
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -21,7 +22,7 @@ func SetupDBConnection() *gorm.DB {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%v sslmode=disable", DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		log.Errorf("error connecting to database. error: %v", err)
 	}
 
 	// Migrate the schema
